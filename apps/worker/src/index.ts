@@ -7,13 +7,14 @@ import { roomStub, sendDanmu } from './danmus';
 import { handleLineEvents } from './line/bot';
 import { verifyLineSignature } from './line/signature';
 import type { LineWebhookBody } from './line/types';
+import { pages } from './pages';
 import type { RoomRow } from './db';
 
 export { RoomObject } from './room-object';
 
 type AppContext = Context<{ Bindings: Env }>;
 
-const app = new Hono<{ Bindings: Env }>().basePath('/api');
+const api = new Hono<{ Bindings: Env }>();
 
 function roomUrl(c: AppContext, key: string) {
   return new URL(`/api/rooms/${key}`, c.req.url).toString();
@@ -30,7 +31,7 @@ async function findRoom(c: AppContext) {
 const notFound = (c: AppContext) => c.json({ error: 'room not found' }, 404);
 const wrongToken = (c: AppContext) => c.json({ error: 'wrong auth_token' }, 401);
 
-app.get('/rooms', async (c) => {
+api.get('/rooms', async (c) => {
   const rooms = (await listOnlineRooms(c.env.DB)).map((row) => toRoom(c, row));
   return c.json<RoomList>({
     rooms,
@@ -39,7 +40,7 @@ app.get('/rooms', async (c) => {
   });
 });
 
-app.post('/rooms', async (c) => {
+api.post('/rooms', async (c) => {
   const row = await createRoom(c.env.DB, c.req.header('cf-connecting-ip') ?? null);
   await roomStub(c.env, row.id).open(
     { id: row.id, key: row.key, authToken: row.auth_token },
@@ -56,12 +57,12 @@ app.post('/rooms', async (c) => {
   );
 });
 
-app.get('/rooms/:key', async (c) => {
+api.get('/rooms/:key', async (c) => {
   const row = await findRoom(c);
   return row ? c.json<Room>(toRoom(c, row)) : notFound(c);
 });
 
-app.post('/rooms/:key/danmus', async (c) => {
+api.post('/rooms/:key/danmus', async (c) => {
   const body = await c.req
     .json<Partial<CreateDanmuRequest>>()
     .catch((): Partial<CreateDanmuRequest> => ({}));
@@ -77,7 +78,7 @@ app.post('/rooms/:key/danmus', async (c) => {
 });
 
 // Polling fallback for screens that do not use the WebSocket yet (original API).
-app.get('/rooms/:key/danmus', async (c) => {
+api.get('/rooms/:key/danmus', async (c) => {
   const row = await findRoom(c);
   if (!row) return notFound(c);
   if (c.req.query('auth_token') !== row.auth_token) return wrongToken(c);
@@ -85,7 +86,7 @@ app.get('/rooms/:key/danmus', async (c) => {
   return c.json(row.online === 1 ? await roomStub(c.env, row.id).popQueued() : []);
 });
 
-app.get('/rooms/:key/ws', async (c) => {
+api.get('/rooms/:key/ws', async (c) => {
   if (c.req.header('upgrade')?.toLowerCase() !== 'websocket') {
     return c.json({ error: 'expected a WebSocket upgrade' }, 426);
   }
@@ -96,7 +97,7 @@ app.get('/rooms/:key/ws', async (c) => {
 });
 
 // LINE Messaging API webhook (same path as the original server).
-app.post('/line/callback', async (c) => {
+api.post('/line/callback', async (c) => {
   const body = await c.req.text();
   const valid = await verifyLineSignature(
     c.env.LINE_CHANNEL_SECRET,
@@ -109,5 +110,9 @@ app.post('/line/callback', async (c) => {
   await handleLineEvents(c.env, events);
   return c.text('Success');
 });
+
+const app = new Hono<{ Bindings: Env }>();
+app.route('/api', api);
+app.route('/', pages);
 
 export default app;

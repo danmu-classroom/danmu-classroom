@@ -16,6 +16,9 @@ LINE / 測試 client ──POST /api/rooms/:key/danmus──▶ Worker (Hono) �
 - **Room Durable Object**：一間房一個。螢幕用 hibernatable WebSocket 連線，彈幕即時推送；沒有螢幕連線時先排入佇列，螢幕連上後補送。開房 3 小時後由 alarm 自動關房。
 - **D1**：房間、彈幕紀錄、發送者（之後也存 LINE bot 的對話狀態）。房號只在「開放中的房間」之間唯一，由 partial unique index 保證。
 - **`packages/shared`**：API 與 WebSocket 訊息的共用型別。
+- **`packages/screen-core`**：螢幕共用程式：`ScreenConnection`（開房、WebSocket、斷線重連、房間關閉後自動開新房）、`DanmuCanvas`（彈幕繪製）與字型。
+- **`apps/screen`**：Electron 螢幕（疊在簡報上的透明視窗 + 控制面板），從 [danmu-classroom-screen](https://github.com/danmu-classroom/danmu-classroom-screen) 搬入並改用 WebSocket。
+- **瀏覽器螢幕** `/screen`：由 Worker 提供，背景透明，可當 OBS 瀏覽器來源；`/screen?bg=green` 可改成純色背景（綠幕去背）。
 
 ## API
 
@@ -36,6 +39,8 @@ LINE / 測試 client ──POST /api/rooms/:key/danmus──▶ Worker (Hono) �
 
 ```bash
 pnpm dev        # wrangler dev（本機 D1 + Durable Objects），http://localhost:8787
+                # 瀏覽器螢幕：http://localhost:8787/screen
+pnpm dev:screen # Electron 螢幕（連到 localhost:8787），視窗在 http://localhost:6080（noVNC，密碼 vscode）
 pnpm test       # vitest，在 Workers runtime 內執行
 pnpm typecheck
 pnpm lint
@@ -61,6 +66,6 @@ LINE Developers console 的 Webhook URL 設為 `https://<worker 網址>/api/line
 
 - [x] M1：Worker + Room Durable Object + WebSocket、開房與房號配發、自動關房
 - [x] M2：LINE bot webhook
-- [ ] M3：螢幕端（Electron 改用 WebSocket、瀏覽器版）
+- [x] M3：螢幕端（Electron 改用 WebSocket、瀏覽器版）
 - [ ] M4：網頁（介紹頁、主持人歷史紀錄）
 - [ ] M5：部署（`wrangler deploy`、CI、LINE webhook 切換）

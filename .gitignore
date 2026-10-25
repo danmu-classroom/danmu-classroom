@@ -7,3 +7,4 @@ out/
 *.log
 .DS_Store
 apps/worker/worker-configuration.d.ts
+apps/worker/public/assets/

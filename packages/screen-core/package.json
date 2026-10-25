@@ -1,0 +1,19 @@
+{
+  "name": "@danmu/screen-core",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./fonts/*": "./fonts/*"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc -p ."
+  },
+  "dependencies": {
+    "@danmu/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "vitest": "^5.0.5"
+  }
+}

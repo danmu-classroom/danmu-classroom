@@ -7,6 +7,7 @@
   },
   "scripts": {
     "dev": "pnpm --filter @danmu/worker dev",
+    "dev:screen": "pnpm --filter @danmu/screen start",
     "test": "pnpm -r test",
     "typecheck": "pnpm -r typecheck",
     "lint": "eslint . && prettier --check .",

@@ -1,9 +1,16 @@
 {
-  "name": "danmu-classroom (Node 24 + Cloudflare Workers)",
-  "image": "mcr.microsoft.com/devcontainers/typescript-node:24-bookworm",
-  "forwardPorts": [8787],
+  "name": "danmu-classroom (Node 24 + Cloudflare Workers + Electron)",
+  "build": { "dockerfile": "Dockerfile" },
+  "features": {
+    // Desktop for the Electron screen: http://localhost:6080 (password: vscode)
+    "ghcr.io/devcontainers/features/desktop-lite:1": {}
+  },
+  // Published (not only forwarded) so the Worker and the Electron desktop are reachable
+  // from the host browser with or without VS Code.
+  "appPort": ["8787:8787", "6080:6080"],
   "portsAttributes": {
-    "8787": { "label": "Worker (wrangler dev)" }
+    "8787": { "label": "Worker (wrangler dev)" },
+    "6080": { "label": "Electron desktop (noVNC)" }
   },
   "mounts": [
     // Keep Linux node_modules / pnpm store out of the macOS checkout.
@@ -11,7 +18,8 @@
     "source=danmu-classroom-pnpm-store,target=/home/node/.local/share/pnpm,type=volume"
   ],
   "containerEnv": {
-    "COREPACK_ENABLE_DOWNLOAD_PROMPT": "0"
+    "COREPACK_ENABLE_DOWNLOAD_PROMPT": "0",
+    "ELECTRON_DISABLE_SANDBOX": "1"
   },
   "remoteUser": "node",
   "postCreateCommand": "sudo chown node:node node_modules /home/node/.local/share/pnpm && sudo corepack enable pnpm && pnpm install --frozen-lockfile",

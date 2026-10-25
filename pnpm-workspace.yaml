@@ -6,5 +6,7 @@ minimumReleaseAgeExclude:
 
 # Dependencies allowed to run install scripts (native binaries)
 allowBuilds:
+  '@parcel/watcher': false
+  electron-winstaller: false
   esbuild: true
   workerd: true

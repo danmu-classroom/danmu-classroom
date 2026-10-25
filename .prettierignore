@@ -1,2 +1,4 @@
 pnpm-lock.yaml
 apps/worker/worker-configuration.d.ts
+apps/worker/public/assets/
+apps/screen/CHANGELOG.md

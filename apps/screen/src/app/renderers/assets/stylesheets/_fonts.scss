@@ -1,0 +1,10 @@
+// Fonts are shared with the browser screen: packages/screen-core/fonts
+@font-face {
+  font-family: '瀨戶字體';
+  src: url('@fonts/setofont.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: '思源柔黑體';
+  src: url('@fonts/GenJyuuGothic-Bold.ttf') format('truetype');
+}

@@ -4,6 +4,8 @@
   "main": "src/index.ts",
   "compatibility_date": "2026-10-01",
   "observability": { "enabled": true },
+  // Built by `pnpm build:client` (browser screen script + font); other paths go to the Worker
+  "assets": { "directory": "./public" },
   "d1_databases": [
     {
       "binding": "DB",

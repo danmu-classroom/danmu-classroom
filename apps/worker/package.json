@@ -3,19 +3,23 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "predev": "wrangler d1 migrations apply DB --local",
+    "build:client": "esbuild client/screen.ts --bundle --format=esm --target=es2022 --minify --outfile=public/assets/screen.js && mkdir -p public/assets/fonts && cp ../../packages/screen-core/fonts/GenJyuuGothic-Bold.ttf public/assets/fonts/",
+    "predev": "pnpm build:client && wrangler d1 migrations apply DB --local",
     "dev": "wrangler dev --ip 0.0.0.0",
-    "deploy": "wrangler d1 migrations apply DB --remote && wrangler deploy",
+    "deploy": "pnpm build:client && wrangler d1 migrations apply DB --remote && wrangler deploy",
     "cf-typegen": "wrangler types",
+    "pretest": "pnpm build:client",
     "test": "vitest run",
-    "typecheck": "wrangler types && tsc -p ."
+    "typecheck": "wrangler types && tsc -p . && tsc -p client"
   },
   "dependencies": {
     "@danmu/shared": "workspace:*",
-    "hono": "^4.13.14"
+    "hono": "^4.13.14",
+    "@danmu/screen-core": "workspace:*"
   },
   "devDependencies": {
     "@cloudflare/vitest-plugin": "^1.4.7",
+    "esbuild": "^0.28.2",
     "vitest": "^5.0.5",
     "wrangler": "^4.152.0"
   }

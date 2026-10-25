@@ -1,0 +1,11 @@
+{
+  "upstream": "https://danmu-classroom.REPLACE-WITH-ACCOUNT.workers.dev",
+  "danmu": {
+    "speed": 5000,
+    "fontFamily": "思源柔黑體",
+    "fontSize": 60,
+    "color": "#fff",
+    "strokeColor": "#000",
+    "strokeWidth": 3
+  }
+}
