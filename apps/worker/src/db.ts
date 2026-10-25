@@ -84,3 +84,43 @@ export function insertDanmu(db: D1Database, roomId: number, senderId: number, co
       created_at: string;
     }>();
 }
+
+export interface SenderState {
+  id: number;
+  uid: string;
+  room_key: string | null;
+  last_action: string | null;
+}
+
+export async function findOrCreateSenderState(
+  db: D1Database,
+  provider: string,
+  uid: string,
+): Promise<SenderState> {
+  const row = await db
+    .prepare(
+      `INSERT INTO senders (provider, uid) VALUES (?, ?)
+       ON CONFLICT (provider, uid) DO UPDATE SET updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
+       RETURNING id, uid, room_key, last_action`,
+    )
+    .bind(provider, uid)
+    .first<SenderState>();
+  if (!row) throw new Error('could not save sender');
+  return row;
+}
+
+export async function updateSenderState(
+  db: D1Database,
+  id: number,
+  changes: Partial<Pick<SenderState, 'room_key' | 'last_action'>>,
+) {
+  const columns = Object.keys(changes) as (keyof typeof changes)[];
+  if (columns.length === 0) return;
+  await db
+    .prepare(
+      `UPDATE senders SET ${columns.map((column) => `${column} = ?`).join(', ')},
+       updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now') WHERE id = ?`,
+    )
+    .bind(...columns.map((column) => changes[column] ?? null), id)
+    .run();
+}

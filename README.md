@@ -41,10 +41,26 @@ pnpm typecheck
 pnpm lint
 ```
 
+## LINE bot
+
+對話流程與舊版相同：先按「輸入房號」→ 輸入螢幕上的房號 → 之後傳的每則訊息都會變成彈幕，並可「換個房間」或「離開房間」。對話狀態存在 D1 的 `senders`。
+
+需要 Messaging API channel 的兩個值：
+
+```bash
+# 本機：複製範例後填入
+cp apps/worker/.dev.vars.example apps/worker/.dev.vars
+# 正式環境
+pnpm --filter @danmu/worker exec wrangler secret put LINE_CHANNEL_SECRET
+pnpm --filter @danmu/worker exec wrangler secret put LINE_CHANNEL_TOKEN
+```
+
+LINE Developers console 的 Webhook URL 設為 `https://<worker 網址>/api/line/callback`。
+
 ## 進度
 
 - [x] M1：Worker + Room Durable Object + WebSocket、開房與房號配發、自動關房
-- [ ] M2：LINE bot webhook
+- [x] M2：LINE bot webhook
 - [ ] M3：螢幕端（Electron 改用 WebSocket、瀏覽器版）
 - [ ] M4：網頁（介紹頁、主持人歷史紀錄）
 - [ ] M5：部署（`wrangler deploy`、CI、LINE webhook 切換）

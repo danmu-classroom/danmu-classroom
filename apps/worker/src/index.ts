@@ -1,8 +1,12 @@
-import { DANMU_MAX_LENGTH, ROOM_LIFETIME_MS } from '@danmu/shared';
+import { ROOM_LIFETIME_MS } from '@danmu/shared';
 import type { CreateDanmuRequest, CreatedRoom, Room, RoomList } from '@danmu/shared';
 import { Hono } from 'hono';
 import type { Context } from 'hono';
-import { createRoom, findOrCreateSender, findRoomByKey, insertDanmu, listOnlineRooms } from './db';
+import { createRoom, findRoomByKey, listOnlineRooms } from './db';
+import { roomStub, sendDanmu } from './danmus';
+import { handleLineEvents } from './line/bot';
+import { verifyLineSignature } from './line/signature';
+import type { LineWebhookBody } from './line/types';
 import type { RoomRow } from './db';
 
 export { RoomObject } from './room-object';
@@ -10,10 +14,6 @@ export { RoomObject } from './room-object';
 type AppContext = Context<{ Bindings: Env }>;
 
 const app = new Hono<{ Bindings: Env }>().basePath('/api');
-
-function roomStub(env: Env, roomId: number) {
-  return env.ROOM.get(env.ROOM.idFromName(String(roomId)));
-}
 
 function roomUrl(c: AppContext, key: string) {
   return new URL(`/api/rooms/${key}`, c.req.url).toString();
@@ -62,30 +62,18 @@ app.get('/rooms/:key', async (c) => {
 });
 
 app.post('/rooms/:key/danmus', async (c) => {
-  const row = await findRoom(c);
-  if (!row) return notFound(c);
-
   const body = await c.req
     .json<Partial<CreateDanmuRequest>>()
     .catch((): Partial<CreateDanmuRequest> => ({}));
-  const content = body.danmu?.content?.trim() ?? '';
-  const sender = body.danmu?.sender;
-  if (!sender?.provider || !sender.uid) return c.json({ sender: ["can't be blank"] }, 422);
-  if (!content) return c.json({ content: ["can't be blank"] }, 422);
-  if (content.length > DANMU_MAX_LENGTH) {
-    return c.json({ content: [`is too long (maximum is ${DANMU_MAX_LENGTH} characters)`] }, 422);
-  }
+  const result = await sendDanmu(
+    c.env,
+    c.req.param('key'),
+    body.danmu?.sender,
+    body.danmu?.content,
+  );
+  if (!result.ok) return result.status === 404 ? notFound(c) : c.json(result.errors, 422);
 
-  const offline = () => c.json({ base: ['Room is offline, can not add new danmu.'] }, 422);
-  if (row.online !== 1) return offline();
-
-  const createdAt = new Date().toISOString();
-  const result = await roomStub(c.env, row.id).deliver({ content, created_at: createdAt });
-  if (result === 'offline') return offline();
-
-  const senderId = await findOrCreateSender(c.env.DB, sender);
-  const danmu = await insertDanmu(c.env.DB, row.id, senderId, content);
-  return c.json(danmu, 201);
+  return c.json(result.danmu, 201);
 });
 
 // Polling fallback for screens that do not use the WebSocket yet (original API).
@@ -105,6 +93,21 @@ app.get('/rooms/:key/ws', async (c) => {
   if (!row) return notFound(c);
 
   return roomStub(c.env, row.id).fetch(c.req.raw);
+});
+
+// LINE Messaging API webhook (same path as the original server).
+app.post('/line/callback', async (c) => {
+  const body = await c.req.text();
+  const valid = await verifyLineSignature(
+    c.env.LINE_CHANNEL_SECRET,
+    body,
+    c.req.header('x-line-signature'),
+  );
+  if (!valid) return c.json({ error: 'signature invalid' }, 401);
+
+  const { events = [] } = JSON.parse(body) as Partial<LineWebhookBody>;
+  await handleLineEvents(c.env, events);
+  return c.text('Success');
 });
 
 export default app;
