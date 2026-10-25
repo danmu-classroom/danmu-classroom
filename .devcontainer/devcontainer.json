@@ -1,0 +1,27 @@
+{
+  "name": "danmu-classroom (Node 24 + Cloudflare Workers)",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:24-bookworm",
+  "forwardPorts": [8787],
+  "portsAttributes": {
+    "8787": { "label": "Worker (wrangler dev)" }
+  },
+  "mounts": [
+    // Keep Linux node_modules / pnpm store out of the macOS checkout.
+    "source=danmu-classroom-node_modules,target=${containerWorkspaceFolder}/node_modules,type=volume",
+    "source=danmu-classroom-pnpm-store,target=/home/node/.local/share/pnpm,type=volume"
+  ],
+  "containerEnv": {
+    "COREPACK_ENABLE_DOWNLOAD_PROMPT": "0"
+  },
+  "remoteUser": "node",
+  "postCreateCommand": "sudo chown node:node node_modules /home/node/.local/share/pnpm && sudo corepack enable pnpm && pnpm install --frozen-lockfile",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "streetsidesoftware.code-spell-checker"
+      ]
+    }
+  }
+}

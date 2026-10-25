@@ -1,0 +1,22 @@
+{
+  "name": "@danmu/worker",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "predev": "wrangler d1 migrations apply DB --local",
+    "dev": "wrangler dev --ip 0.0.0.0",
+    "deploy": "wrangler d1 migrations apply DB --remote && wrangler deploy",
+    "cf-typegen": "wrangler types",
+    "test": "vitest run",
+    "typecheck": "wrangler types && tsc -p ."
+  },
+  "dependencies": {
+    "@danmu/shared": "workspace:*",
+    "hono": "^4.13.14"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-plugin": "^1.4.7",
+    "vitest": "^5.0.5",
+    "wrangler": "^4.152.0"
+  }
+}
