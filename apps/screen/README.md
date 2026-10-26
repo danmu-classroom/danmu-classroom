@@ -2,21 +2,7 @@
 
 ## 使用說明
 
-1. 到 [Releases](https://github.com/danmu-classroom/danmu-classroom/releases?q=screen-v&expanded=true) 下載最新的 `screen-v*` 版本
-
-   - macOS（Apple Silicon）：`danmu-classroom-screen-<版本>-mac-arm64.dmg`；Intel Mac：`…-mac-x64.dmg`
-   - Windows：`danmu-classroom-screen-<版本>-win-x64.exe`（免安裝，直接執行）
-   - Linux：`danmu-classroom-screen-<版本>-linux-x86_64.AppImage`
-
-   安裝檔沒有簽章：macOS 第一次開啟若顯示「無法驗證開發者」，請到「系統設定 → 隱私權與安全性」按「強制打開」；Windows 出現 SmartScreen 時按「其他資訊 → 仍要執行」。
-
-2. 打開 `danmu-classroom-screen`
-
-3. 控制面板會顯示房號和兩個 QR code，觀眾任選一種方式送彈幕：
-   - **網頁**：用手機掃左邊的 QR code（或打開下方網址），輸入訊息送出，不用登入
-   - **LINE**：掃右邊的 QR code 加入好友，按「輸入房號」後輸入螢幕上的四位數字，之後傳的訊息都會變成彈幕
-
-4. 想保存這間房的彈幕紀錄：按「保存到我的帳號」，在瀏覽器用 Google 登入後確認
+下載與使用方式見 [彈幕教室 README](../../README.md#主持人開始上課)。
 
 ## 開發
 

@@ -61,8 +61,14 @@ export default tseslint.config(
     languageOptions: { globals: { ...globals.browser } },
   },
   {
-    files: ['**/*.mjs', '**/*.config.ts'],
+    files: ['**/*.mjs', '**/*.cjs', '**/*.config.ts'],
     ...tseslint.configs.disableTypeChecked,
+  },
+  {
+    // Plain Node/Electron scripts (docs screenshots)
+    files: ['scripts/**'],
+    languageOptions: { globals: { ...globals.node } },
+    rules: { '@typescript-eslint/no-require-imports': 'off' },
   },
   prettier,
 );
