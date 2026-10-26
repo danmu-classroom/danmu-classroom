@@ -13,6 +13,11 @@ describe('browser screen page', () => {
     expect(body).toContain('<script type="module" src="/assets/screen.js"></script>');
     expect(body).toContain('<canvas id="danmu-canvas"></canvas>');
     expect(body).toContain('background: transparent');
+    expect(body).toMatch(/<div id="join" hidden(="")?>/);
+  });
+
+  it('?qr=0 hides the join QR code', async () => {
+    expect(await (await get('/screen?qr=0')).text()).not.toContain('id="join"');
   });
 
   it('accepts a plain CSS color for ?bg= and ignores anything else', async () => {

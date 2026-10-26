@@ -71,8 +71,13 @@ api.post('/rooms/:key/danmus', async (c) => {
     c.req.param('key'),
     body.danmu?.sender,
     body.danmu?.content,
+    { rateLimit: true },
   );
-  if (!result.ok) return result.status === 404 ? notFound(c) : c.json(result.errors, 422);
+  if (!result.ok) {
+    if (result.status === 404) return notFound(c);
+    if (result.status === 429) c.header('Retry-After', '1');
+    return c.json(result.errors, result.status);
+  }
 
   return c.json(result.danmu, 201);
 });

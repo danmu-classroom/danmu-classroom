@@ -200,6 +200,16 @@ describe('LINE webhook', () => {
     expect(verification.status).toBe(200);
   });
 
+  it('does not throttle LINE users', async () => {
+    const room = await createRoom();
+    await lineEvent(postbackEvent('action=ask_for_setting_room_key'));
+    await lineEvent(textEvent(room.key));
+
+    for (let i = 0; i < 5; i++) await lineEvent(textEvent(`fast ${i}`));
+
+    expect(await popDanmus(room)).toHaveLength(5);
+  });
+
   it('rejects requests with a missing or wrong signature', async () => {
     expect((await lineEvent(textEvent('hi'), 'not-the-secret')).status).toBe(401);
     const unsigned = await api('/line/callback', {

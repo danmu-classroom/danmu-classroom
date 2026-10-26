@@ -1,10 +1,13 @@
 import { Controller } from '@hotwired/stimulus';
+import { displayJoinUrl, joinQrSvg } from '@danmu/screen-core';
 import type { Display } from 'electron';
 import type { AppConfig, Room } from '../../../../core/models';
 
 export class DashboardController extends Controller {
   static targets = [
     'roomKey',
+    'joinQr',
+    'joinUrl',
     'testDanmuInput',
     'fontFamilySelect',
     'fontSizeInput',
@@ -20,6 +23,8 @@ export class DashboardController extends Controller {
   declare displaysInputContainerTarget: HTMLElement;
   declare fontFamilySelectTarget: HTMLSelectElement;
   declare fontSizeInputTarget: HTMLInputElement;
+  declare joinQrTarget: HTMLElement;
+  declare joinUrlTarget: HTMLElement;
   declare roomKeyTarget: HTMLElement;
   declare roomValue: Room;
   declare speedInputTarget: HTMLInputElement;
@@ -117,5 +122,8 @@ export class DashboardController extends Controller {
   private showRoom(room: Room) {
     this.roomValue = room;
     this.roomKeyTarget.innerText = room.key;
+    // QR code of the web send page for this room (SVG generated locally)
+    this.joinQrTarget.innerHTML = joinQrSvg(this.appConfigValue.upstream, room.key);
+    this.joinUrlTarget.innerText = displayJoinUrl(this.appConfigValue.upstream, room.key);
   }
 }

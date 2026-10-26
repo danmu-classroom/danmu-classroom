@@ -1,6 +1,6 @@
 # 彈幕教室 Danmu Classroom
 
-在課堂或活動上，讓觀眾透過 LINE 傳訊息，訊息會以彈幕形式飛過講者的螢幕。
+在課堂或活動上，讓觀眾用手機、電腦或 LINE 傳訊息，訊息會以彈幕形式飛過講者的螢幕。
 
 這是在 Cloudflare 上的重寫版本，取代 [danmu-classroom-server](https://github.com/danmu-classroom/danmu-classroom-server)（Rails / Heroku）。
 
@@ -18,7 +18,8 @@ LINE / 測試 client ──POST /api/rooms/:key/danmus──▶ Worker (Hono) �
 - **`packages/shared`**：API 與 WebSocket 訊息的共用型別。
 - **`packages/screen-core`**：螢幕共用程式：`ScreenConnection`（開房、WebSocket、斷線重連、房間關閉後自動開新房）、`DanmuCanvas`（彈幕繪製）與字型。
 - **`apps/screen`**：Electron 螢幕（疊在簡報上的透明視窗 + 控制面板），從 [danmu-classroom-screen](https://github.com/danmu-classroom/danmu-classroom-screen) 搬入並改用 WebSocket。
-- **瀏覽器螢幕** `/screen`：由 Worker 提供，背景透明，可當 OBS 瀏覽器來源；`/screen?bg=green` 可改成純色背景（綠幕去背）。
+- **瀏覽器螢幕** `/screen`：由 Worker 提供，背景透明，可當 OBS 瀏覽器來源；`/screen?bg=green` 可改成純色背景（綠幕去背），`?qr=0` 隱藏右下角的加入 QR code。
+- **觀眾網頁** `/`、`/r/:key`：手機或電腦送彈幕。
 
 ## API
 
@@ -46,6 +47,13 @@ pnpm typecheck
 pnpm lint
 ```
 
+## 觀眾怎麼送彈幕
+
+- **網頁（門檻最低）**：掃螢幕上的 QR code，或打開 `/` 輸入房號，就能直接送出。不用登入；瀏覽器會產生一個匿名 ID 存在 localStorage。
+- **LINE**：加入官方帳號好友後輸入房號（見下方）。
+
+公開 API 送出的彈幕每位發送者有頻率限制（一次最多連送 3 則，之後約每秒 1 則，超過回 429），由房間的 Durable Object 計算；LINE 不受限。
+
 ## LINE bot
 
 對話流程與舊版相同：先按「輸入房號」→ 輸入螢幕上的房號 → 之後傳的每則訊息都會變成彈幕，並可「換個房間」或「離開房間」。對話狀態存在 D1 的 `senders`。
@@ -54,18 +62,5 @@ pnpm lint
 
 ```bash
 # 本機：複製範例後填入
-cp apps/worker/.dev.vars.example apps/worker/.dev.vars
-# 正式環境
-pnpm --filter @danmu/worker exec wrangler secret put LINE_CHANNEL_SECRET
-pnpm --filter @danmu/worker exec wrangler secret put LINE_CHANNEL_TOKEN
+cp apps/worker/.dev.vars.example apps/worker/.dev.
 ```
-
-LINE Developers console 的 Webhook URL 設為 `https://<worker 網址>/api/line/callback`。
-
-## 進度
-
-- [x] M1：Worker + Room Durable Object + WebSocket、開房與房號配發、自動關房
-- [x] M2：LINE bot webhook
-- [x] M3：螢幕端（Electron 改用 WebSocket、瀏覽器版）
-- [ ] M4：網頁（介紹頁、主持人歷史紀錄）
-- [ ] M5：部署（`wrangler deploy`、CI、LINE webhook 切換）

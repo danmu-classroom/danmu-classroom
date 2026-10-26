@@ -19,19 +19,21 @@
         <img src="./assets/images/icon.png" width="150" height="150" class="me-2" />
         彈幕教室
       </h1>
-      <div class="row">
-        <div class="col-sm d-flex flex-wrap align-items-center mb-3">
-          <img src="./assets/images/line-bot-qr.png" class="img-fluid mx-auto" />
+      <p class="lead text-center">
+        房號
+        <span class="ms-2 text-warning display-2" data-dashboard-target="roomKey"></span>
+      </p>
+      <div class="row text-center">
+        <div class="col-sm mb-3">
+          <h2 class="h5">用手機或電腦</h2>
+          <div class="join-qr mx-auto" data-dashboard-target="joinQr"></div>
+          <p class="mt-2 mb-0 fw-bold" data-dashboard-target="joinUrl"></p>
+          <p class="text-muted small">掃描或打開網址，直接送出彈幕</p>
         </div>
-        <div class="col-sm d-flex flex-wrap align-items-center mb-3">
-          <ol>
-            <li class="lead">掃瞄 QR Code 加入好友</li>
-            <li class="lead">
-              輸入房號
-              <span class="ms-2 text-warning display-2" data-dashboard-target="roomKey"></span>
-            </li>
-            <li class="lead">暢所欲言</li>
-          </ol>
+        <div class="col-sm mb-3">
+          <h2 class="h5">用 LINE</h2>
+          <img src="./assets/images/line-bot-qr.png" class="join-qr img-fluid mx-auto d-block" />
+          <p class="text-muted small mt-2">加入好友後輸入房號</p>
         </div>
       </div>
       <div class="card m-2">

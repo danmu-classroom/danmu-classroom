@@ -8,11 +8,20 @@ interface RoomMeta {
   online: boolean;
 }
 
-export type DeliverResult = 'delivered' | 'queued' | 'offline';
+export type DeliverResult = 'delivered' | 'queued' | 'offline' | 'rate_limited';
 
 // Danmus kept for screens that are not connected (or still poll); oldest dropped first.
 const MAX_QUEUED_DANMUS = 500;
 export const ROOM_CLOSED_CLOSE_CODE = 4000;
+
+// Per-sender token bucket for the public HTTP API: a short burst, then about 1 danmu per second.
+export const RATE_LIMIT_BURST = 3;
+export const RATE_LIMIT_REFILL_MS = 1000;
+
+interface Bucket {
+  tokens: number;
+  updatedAt: number;
+}
 
 /**
  * One instance per room (named by the room id). Pushes danmus to connected screens over
@@ -20,6 +29,9 @@ export const ROOM_CLOSED_CLOSE_CODE = 4000;
  * with an alarm when its lifetime ends.
  */
 export class RoomObject extends DurableObject<Env> {
+  // In memory only: resetting when the object is evicted is fine for a rate limit.
+  private readonly buckets = new Map<string, Bucket>();
+
   constructor(ctx: DurableObjectState, env: Env) {
     super(ctx, env);
     // Answer keep-alive pings without waking the object up.
@@ -32,9 +44,11 @@ export class RoomObject extends DurableObject<Env> {
     await this.ctx.storage.setAlarm(Date.now() + lifetimeMs);
   }
 
-  async deliver(danmu: Danmu): Promise<DeliverResult> {
+  /** `rateLimitKey` identifies the sender when the danmu came through the public API. */
+  async deliver(danmu: Danmu, rateLimitKey?: string): Promise<DeliverResult> {
     const meta = await this.meta();
     if (!meta?.online) return 'offline';
+    if (rateLimitKey && !this.takeToken(rateLimitKey)) return 'rate_limited';
 
     const sockets = this.ctx.getWebSockets();
     if (sockets.length > 0) {
@@ -104,6 +118,21 @@ export class RoomObject extends DurableObject<Env> {
 
   override webSocketClose(socket: WebSocket, code: number, reason: string): void {
     socket.close(code, reason);
+  }
+
+  private takeToken(key: string): boolean {
+    const now = Date.now();
+    const bucket = this.buckets.get(key) ?? { tokens: RATE_LIMIT_BURST, updatedAt: now };
+    const refilled = Math.min(
+      RATE_LIMIT_BURST,
+      bucket.tokens + (now - bucket.updatedAt) / RATE_LIMIT_REFILL_MS,
+    );
+    if (refilled < 1) {
+      this.buckets.set(key, { tokens: refilled, updatedAt: now });
+      return false;
+    }
+    this.buckets.set(key, { tokens: refilled - 1, updatedAt: now });
+    return true;
   }
 
   private meta() {

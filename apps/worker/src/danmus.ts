@@ -6,7 +6,12 @@ export type DanmuRecord = NonNullable<Awaited<ReturnType<typeof insertDanmu>>>;
 
 export type SendDanmuResult =
   | { ok: true; danmu: DanmuRecord }
-  | { ok: false; status: 404 | 422; errors: Record<string, string[]> };
+  | { ok: false; status: 404 | 422 | 429; errors: Record<string, string[]> };
+
+export interface SendDanmuOptions {
+  /** Throttle the sender (public HTTP API; LINE users are not throttled). */
+  rateLimit?: boolean;
+}
 
 export function roomStub(env: Env, roomId: number) {
   return env.ROOM.get(env.ROOM.idFromName(String(roomId)));
@@ -21,6 +26,7 @@ export async function sendDanmu(
   roomKey: string,
   sender: Partial<DanmuSender> | undefined,
   rawContent: string | undefined,
+  { rateLimit = false }: SendDanmuOptions = {},
 ): Promise<SendDanmuResult> {
   const room = await findRoomByKey(env.DB, roomKey);
   if (!room) return { ok: false, status: 404, errors: { room: ['not found'] } };
@@ -44,11 +50,18 @@ export async function sendDanmu(
     errors: { base: ['Room is offline, can not add new danmu.'] },
   };
   if (room.online !== 1) return offline;
-  const delivered = await roomStub(env, room.id).deliver({
-    content,
-    created_at: new Date().toISOString(),
-  });
+  const delivered = await roomStub(env, room.id).deliver(
+    { content, created_at: new Date().toISOString() },
+    rateLimit ? `${sender.provider}:${sender.uid}` : undefined,
+  );
   if (delivered === 'offline') return offline;
+  if (delivered === 'rate_limited') {
+    return {
+      ok: false,
+      status: 429,
+      errors: { base: ['Sending too fast, try again in a moment.'] },
+    };
+  }
 
   const senderId = await findOrCreateSender(env.DB, { provider: sender.provider, uid: sender.uid });
   const danmu = await insertDanmu(env.DB, room.id, senderId, content);

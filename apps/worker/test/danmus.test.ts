@@ -69,3 +69,25 @@ describe('danmus API', () => {
     expect((await postDanmu('0000', 'hi')).status).toBe(404);
   });
 });
+
+describe('rate limit', () => {
+  it('lets a sender send a short burst, then answers 429', async () => {
+    const room = await createRoom();
+
+    const statuses = [];
+    for (let i = 0; i < 4; i++) statuses.push((await postDanmu(room.key, `burst ${i}`)).status);
+
+    expect(statuses).toEqual([201, 201, 201, 429]);
+    const limited = await postDanmu(room.key, 'again');
+    expect(limited.headers.get('Retry-After')).toBe('1');
+    expect(await limited.json()).toEqual({ base: ['Sending too fast, try again in a moment.'] });
+  });
+
+  it('throttles each sender separately', async () => {
+    const room = await createRoom();
+    for (let i = 0; i < 3; i++) await postDanmu(room.key, `alice ${i}`, 'alice');
+
+    expect((await postDanmu(room.key, 'alice again', 'alice')).status).toBe(429);
+    expect((await postDanmu(room.key, 'hi from bob', 'bob')).status).toBe(201);
+  });
+});

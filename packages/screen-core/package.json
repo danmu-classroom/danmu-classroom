@@ -11,7 +11,8 @@
     "typecheck": "tsc -p ."
   },
   "dependencies": {
-    "@danmu/shared": "workspace:*"
+    "@danmu/shared": "workspace:*",
+    "uqr": "^0.1.3"
   },
   "devDependencies": {
     "vitest": "^5.0.5"

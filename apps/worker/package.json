@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build:client": "esbuild client/screen.ts --bundle --format=esm --target=es2022 --minify --outfile=public/assets/screen.js && mkdir -p public/assets/fonts && cp ../../packages/screen-core/fonts/GenJyuuGothic-Bold.ttf public/assets/fonts/",
+    "build:client": "esbuild client/screen.ts client/send.ts --bundle --format=esm --target=es2022 --minify --outdir=public/assets && mkdir -p public/assets/fonts && cp ../../packages/screen-core/fonts/GenJyuuGothic-Bold.ttf public/assets/fonts/",
     "predev": "pnpm build:client && wrangler d1 migrations apply DB --local",
     "dev": "wrangler dev --ip 0.0.0.0",
     "deploy": "pnpm build:client && wrangler d1 migrations apply DB --remote && wrangler deploy",
