@@ -1,6 +1,8 @@
 {
   "$schema": "../../node_modules/wrangler/config-schema.json",
   "name": "danmu-classroom",
+  // Not a secret; lets CI deploy with just CLOUDFLARE_API_TOKEN
+  "account_id": "c74b247e8c747f6ca397cca820da6319",
   "main": "src/index.ts",
   "compatibility_date": "2026-10-01",
   "observability": { "enabled": true },
@@ -10,8 +12,7 @@
     {
       "binding": "DB",
       "database_name": "danmu-classroom",
-      // Replaced by the real id from `wrangler d1 create danmu-classroom` before the first deploy (M5)
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      "database_id": "e83e2b68-004e-4747-ab6e-39cb85090b5e",
       "migrations_dir": "migrations",
     },
   ],

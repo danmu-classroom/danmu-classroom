@@ -1,5 +1,5 @@
 {
-  "upstream": "https://danmu-classroom.REPLACE-WITH-ACCOUNT.workers.dev",
+  "upstream": "https://danmu-classroom.danmu-worker.workers.dev",
   "danmu": {
     "speed": 5000,
     "fontFamily": "思源柔黑體",

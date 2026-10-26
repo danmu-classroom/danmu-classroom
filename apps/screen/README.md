@@ -28,4 +28,4 @@ pnpm dev:screen # 建置並以 development 模式啟動 Electron；視窗在 htt
 pnpm --filter @danmu/screen electron:pack   # 打包（目前平台）
 ```
 
-開發時連到 `http://localhost:8787`，可用 `DANMU_UPSTREAM` 改連其他位置。正式版的網址在 `src/config/production.json`，部署 Worker（M5）後填入。
+開發時連到 `http://localhost:8787`，可用 `DANMU_UPSTREAM` 改連其他位置。正式版連到 `https://danmu-classroom.danmu-worker.workers.dev`（`src/config/production.json`）。
