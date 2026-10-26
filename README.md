@@ -59,4 +59,51 @@ pnpm lint
 主持人用 Google 登入（`/login`），之後可在 `/host/rooms` 看自己的房間和每間房的彈幕紀錄。房間怎麼歸到帳號：
 
 - 在已登入的瀏覽器開 `/screen`：開的房間自動歸到這個帳號。
-- Electron 螢幕：控制面板按「保存到我的帳號」，會用房間的 `auth_token` 換一個 10 分鐘有效的一�
+- Electron 螢幕：控制面板按「保存到我的帳號」，會用房間的 `auth_token` 換一個 10 分鐘有效的一次性連結並開啟瀏覽器，登入後確認即可。
+
+Session 存在 D1（只存 token 的 SHA-256），cookie 為 HttpOnly、SameSite=Lax，30 天有效；表單 POST 有 CSRF（Origin）檢查。登入方式集中在 `apps/worker/src/auth/providers.ts`，之後要加 LINE、GitHub、Microsoft 只需新增一筆設定。
+
+本機沒有 Google client 時，可在 `.dev.vars` 設 `DEV_LOGIN=true` 使用開發用登入（只在 localhost 生效，正式環境不要設定）。
+
+## LINE bot
+
+對話流程與舊版相同：先按「輸入房號」→ 輸入螢幕上的房號 → 之後傳的每則訊息都會變成彈幕，並可「換個房間」或「離開房間」。對話狀態存在 D1 的 `senders`。
+
+需要 Messaging API channel 的兩個值：
+
+```bash
+# 本機：複製範例後填入
+cp apps/worker/.dev.vars.example apps/worker/.dev.vars
+# 正式環境
+pnpm --filter @danmu/worker exec wrangler secret put LINE_CHANNEL_SECRET
+pnpm --filter @danmu/worker exec wrangler secret put LINE_CHANNEL_TOKEN
+```
+
+LINE Developers console 的 Webhook URL 設為 `https://<worker 網址>/api/line/callback`。
+
+## 部署
+
+正式環境：<https://danmu-classroom.danmu-worker.workers.dev>（D1 `danmu-classroom`，APAC）
+
+- **自動**：push 到 `main` 時，GitHub Actions 跑完 lint / typecheck / test 後部署（build 瀏覽器端 JS → 套用 D1 migrations → `wrangler deploy`）。需要 repo secret `CLOUDFLARE_API_TOKEN`（Cloudflare dashboard → My Profile → API Tokens，用「Edit Cloudflare Workers」範本並加上 D1 Edit 權限）；沒設定時只跳過部署。
+- **手動**（已 `wrangler login`）：`pnpm --filter @danmu/worker run deploy`
+
+Worker secrets（在 `apps/worker` 執行 `wrangler secret put <NAME>`）：
+
+| 名稱                                        | 來源                                                                                                            |
+| ------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `LINE_CHANNEL_SECRET`、`LINE_CHANNEL_TOKEN` | LINE Developers console；舊版的值可用 `scripts/import-line-secrets-from-heroku.sh` 從 Heroku 搬過來（不會印出） |
+| `GOOGLE_CLIENT_ID`、`GOOGLE_CLIENT_SECRET`  | Google Cloud console → Credentials（Web application）                                                           |
+
+要在外部服務設定的網址：
+
+- LINE Developers console → Webhook URL：`https://danmu-classroom.danmu-worker.workers.dev/api/line/callback`
+- Google OAuth client → Authorized redirect URIs：`https://danmu-classroom.danmu-worker.workers.dev/auth/google/callback`（本機：`http://localhost:8787/auth/google/callback`）
+
+## 進度
+
+- [x] M1：Worker + Room Durable Object + WebSocket、開房與房號配發、自動關房
+- [x] M2：LINE bot webhook
+- [x] M3：螢幕端（Electron 改用 WebSocket、瀏覽器版）
+- [x] M4：觀眾網頁、主持人 Google 登入與歷史紀錄
+- [x] M5：部署到 Cloudflare、CI
