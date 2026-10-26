@@ -106,3 +106,7 @@
 - [架構與 API](docs/architecture.md)
 - [開發環境](docs/development.md)
 - [部署、CI/CD 與發佈](docs/deployment.md)
+
+## 授權
+
+[MIT](LICENSE)。字型（`packages/screen-core/fonts`：源柔ゴシック、瀨戶字體）依各自的 [SIL Open Font License](https://openfontlicense.org/) 散布。
