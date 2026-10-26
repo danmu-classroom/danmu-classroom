@@ -124,7 +124,7 @@ Worker secrets（在 `apps/worker` 執行 `wrangler secret put <NAME>`）：
 
 | 名稱                                        | 來源                                                                                                            |
 | ------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| `LINE_CHANNEL_SECRET`、`LINE_CHANNEL_TOKEN` | LINE Developers console；舊版的值可用 `scripts/import-line-secrets-from-heroku.sh` 從 Heroku 搬過來（不會印出） |
+| `LINE_CHANNEL_SECRET`、`LINE_CHANNEL_TOKEN` | LINE Developers console（Messaging API channel 的 Channel secret 與 long-lived Channel access token） |
 | `GOOGLE_CLIENT_ID`、`GOOGLE_CLIENT_SECRET`  | Google Cloud console → Credentials（Web application）                                                           |
 
 要在外部服務設定的網址：
