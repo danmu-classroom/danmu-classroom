@@ -6,11 +6,43 @@
 
 ## 架構
 
+```mermaid
+flowchart TB
+  subgraph audience["觀眾"]
+    direction LR
+    web["手機／電腦瀏覽器<br/>/r/:key"]
+    lineUser["LINE 使用者"]
+  end
+
+  linePlatform["LINE 平台"]
+
+  subgraph cloudflare["Cloudflare"]
+    direction LR
+    worker["Worker（Hono）<br/>API · LINE webhook · 頁面"]
+    room[("Room Durable Object<br/>每間房一個")]
+    d1[("D1<br/>房間 · 彈幕 · 帳號")]
+  end
+
+  subgraph screens["螢幕（主持人）"]
+    direction LR
+    electron["Electron 螢幕<br/>apps/screen"]
+    browserScreen["瀏覽器螢幕 /screen<br/>可當 OBS 來源"]
+  end
+
+  hostPages["主持人頁面 /host<br/>Google 登入"]
+
+  web -- "HTTP 送彈幕" --> worker
+  lineUser --> linePlatform
+  linePlatform <-- "webhook ⇄ 回覆" --> worker
+  worker -- "寫入" --> d1
+  worker -- "RPC" --> room
+  room -- "WebSocket 推送" --> screens
+  hostPages -- "查詢紀錄" --> worker
 ```
-LINE / 測試 client ──POST /api/rooms/:key/danmus──▶ Worker (Hono) ──RPC──▶ Room Durable Object ──WebSocket──▶ 螢幕
-                                                       │                        │
-                                                       └──── D1（房間、彈幕紀錄、發送者）◀── alarm 3 小時後關房
-```
+
+一則彈幕的路徑：觀眾從網頁或 LINE 送出 → Worker 驗證並寫入 D1 → 交給該房間的 Durable Object → 透過 WebSocket 推到所有連線中的螢幕（沒有螢幕連線時先排隊，連上後補送）。所有連線都是「用戶端 ↔ Cloudflare」，沒有瀏覽器之間的 P2P。
+
+圖中省略的細節：螢幕啟動時先呼叫 `POST /api/rooms` 開房；Durable Object 在開房 3 小時後以 alarm 自動關房並更新 D1；瀏覽器端的 JS 與字型由 Workers 靜態資源提供；主持人登入走 Google OAuth。
 
 - **Worker**（`apps/worker`）：HTTP API，用 Hono 寫成。
 - **Room Durable Object**：一間房一個。螢幕用 hibernatable WebSocket 連線，彈幕即時推送；沒有螢幕連線時先排入佇列，螢幕連上後補送。開房 3 小時後由 alarm 自動關房。

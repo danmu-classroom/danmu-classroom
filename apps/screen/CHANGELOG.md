@@ -7,14 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-10-26
+
 ### Changed
 
 - Upgrade to Electron 45, Node.js 24, TypeScript 6, Stimulus 3 (`@hotwired/stimulus`), Bootstrap 5.3 and electron-log 5
 - Replace Parcel 1 with electron-vite (Vite 8)
 - Renderers run with context isolation and sandbox; they talk to the main process through a preload `contextBridge` API (`window.danmu`)
-- Room creation and danmu polling run in the main process with the built-in `fetch`; danmus are pushed to the canvas over IPC
+- Room creation and the server connection run in the main process; danmus are pushed to the canvas over IPC
 - ESLint 10 flat config with typescript-eslint, Prettier 3
-- Development upstream is `http://localhost:3001`, overridable with `DANMU_UPSTREAM`
+- Connects to the new Cloudflare server (https://danmu-classroom.danmu-worker.workers.dev) and receives danmus over a WebSocket instead of polling
+- Moved into the danmu-classroom monorepo (apps/screen); shares the WebSocket client and danmu renderer with the browser screen
+- Development upstream is `http://localhost:8787` (`wrangler dev`), overridable with `DANMU_UPSTREAM`
 
 ### Fixed
 
@@ -25,7 +29,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Vitest tests for the server client, danmu polling and app config
+- Web QR code on the dashboard: the audience can send danmus from a phone or computer without LINE
+- "保存到我的帳號" button to keep the room's danmu history in the host's account
+- Vitest tests for the app config (connection and rendering tests live in packages/screen-core)
 - Dev Container (Node 24 + desktop-lite for viewing the Electron windows)
 
 ## [0.4.1] - 2021-01-21
@@ -88,6 +94,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Mac Os X app
 
 [unreleased]: https://github.com/danmu-classroom/danmu-classroom-screen/compare/v0.4.1...HEAD
+[1.0.0]: https://github.com/danmu-classroom/danmu-classroom/releases/tag/screen-v1.0.0
 [0.4.1]: https://github.com/danmu-classroom/danmu-classroom-screen/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/danmu-classroom/danmu-classroom-screen/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/danmu-classroom/danmu-classroom-screen/compare/v0.2.0...v0.3.0

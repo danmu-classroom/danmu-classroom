@@ -5,7 +5,7 @@
   "repository": "https://github.com/danmu-classroom/danmu-classroom",
   "homepage": "https://github.com/danmu-classroom/danmu-classroom",
   "license": "MIT",
-  "version": "0.4.1",
+  "version": "1.0.0",
   "main": "out/main/index.js",
   "scripts": {
     "postinstall": "node node_modules/electron/install.js",
@@ -21,14 +21,14 @@
     "electron:dist:all": "electron-vite build && electron-builder -wml"
   },
   "dependencies": {
-    "@hotwired/stimulus": "^3.2.2",
-    "bootstrap": "^5.3.8",
     "electron-log": "^5.4.4"
   },
   "devDependencies": {
     "@danmu/screen-core": "workspace:*",
     "@danmu/shared": "workspace:*",
+    "@hotwired/stimulus": "^3.2.2",
     "@types/node": "^24.0.0",
+    "bootstrap": "^5.3.8",
     "cross-env": "^10.0.0",
     "electron": "^45.0.0",
     "electron-builder": "^26.18.0",
@@ -41,20 +41,56 @@
   "build": {
     "appId": "com.electron.danmu-classroom-screen",
     "productName": "danmu-classroom-screen",
-    "copyright": "Copyright © 2020 楊竑昕",
+    "copyright": "Copyright © 2020-2026 楊竑昕",
+    "artifactName": "${productName}-${version}-${os}-${arch}.${ext}",
     "directories": {
       "buildResources": "build-resources"
-    },
-    "mac": {
-      "category": "public.app-category.utilities"
-    },
-    "win": {
-      "target": "portable"
     },
     "files": [
       "out/**/*",
       "package.json"
-    ]
+    ],
+    "publish": null,
+    "mac": {
+      "category": "public.app-category.utilities",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "arm64",
+            "x64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "arm64",
+            "x64"
+          ]
+        }
+      ]
+    },
+    "win": {
+      "target": [
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "linux": {
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "category": "Utility"
+    }
   },
   "private": true
 }
