@@ -1,4 +1,5 @@
-import { env, runDurableObjectAlarm } from 'cloudflare:test';
+import { env, runDurableObjectAlarm, runInDurableObject } from 'cloudflare:test';
+import type { RoomObject } from '../src/room-object';
 import { describe, expect, it } from 'vitest';
 import { connectScreen, createRoom, popDanmus, postDanmu, waitFor } from './helpers';
 
@@ -54,5 +55,22 @@ describe('screen WebSocket', () => {
       .first<{ online: number }>();
     expect(row?.online).toBe(0);
     expect((await postDanmu(room.key, 'too late')).status).toBe(422);
+  });
+
+  it('answers abnormal disconnects (1006) with a valid close code', async () => {
+    const room = await createRoom();
+    const stub = env.ROOM.get(env.ROOM.idFromName(String(room.id)));
+    const closes: [number | undefined, string | undefined][] = [];
+    const socket = { close: (code?: number, reason?: string) => closes.push([code, reason]) };
+
+    await runInDurableObject(stub, (instance: RoomObject) => {
+      instance.webSocketClose(socket as unknown as WebSocket, 1006, '');
+      instance.webSocketClose(socket as unknown as WebSocket, 1001, 'going away');
+    });
+
+    expect(closes).toEqual([
+      [1000, 'closed'],
+      [1001, 'going away'],
+    ]);
   });
 });

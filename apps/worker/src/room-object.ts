@@ -117,7 +117,10 @@ export class RoomObject extends DurableObject<Env> {
   }
 
   override webSocketClose(socket: WebSocket, code: number, reason: string): void {
-    socket.close(code, reason);
+    // 1005/1006/1015 only describe how the peer went away (no status, abnormal, TLS) and are
+    // not allowed in a close frame, so answer those with a normal closure.
+    if (code === 1005 || code === 1006 || code === 1015) socket.close(1000, 'closed');
+    else socket.close(code, reason);
   }
 
   private takeToken(key: string): boolean {
