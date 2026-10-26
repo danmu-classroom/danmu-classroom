@@ -54,6 +54,18 @@ flowchart TB
 - **觀眾網頁** `/`、`/r/:key`：不用登入；瀏覽器產生匿名 ID 存在 localStorage，以 `provider: "web"` 送出。
 - **瀏覽器螢幕** `/screen`：背景透明，`?bg=` 設純色背景、`?qr=0` 隱藏加入 QR code。在已登入的瀏覽器開啟時，房間自動歸到該主持人。
 
+## 為什麼不用 WebRTC／瀏覽器 P2P
+
+所有連線都經過 Cloudflare（觀眾 HTTP → Worker → Durable Object → WebSocket → 螢幕），而不是讓觀眾的瀏覽器直接連到螢幕。原因：
+
+1. **P2P 省不掉伺服器**：WebRTC 需要信令伺服器交換連線資訊（觀眾也得先靠伺服器用房號找到螢幕），還需要 STUN／TURN 穿越 NAT。學校、公司與活動場地的網路常擋 P2P，最後只能走 TURN 中繼，比現在的做法更貴更複雜。
+2. **LINE 一定要經過伺服器**：LINE webhook 是呼叫公開的 HTTPS 網址，無法連到教室裡的瀏覽器。
+3. **使用情境不適合**：很多觀眾對一台螢幕，P2P 要維持 N 條連線；手機觀眾來來去去，每次建立連線要一兩秒；螢幕斷線時伺服器能排隊補送，P2P 斷了訊息就沒了。
+4. **有些功能只有伺服器做得到**：彈幕紀錄與 CSV、主持人帳號與房間歸屬、觀眾碰不到的防洗版限速、房號配發。
+5. **伺服器成本接近零**：彈幕是短文字、流量極小；Durable Object 閒置時休眠不計費，免費額度就夠用。
+
+若之後要加觀眾麥克風、視訊這類**影音**互動（流量大、要低延遲），才值得用 WebRTC；屆時仍需信令與 TURN，可搭配 Cloudflare Realtime。完全沒有網路的場地，較實際的做法是現場放一台區域網路伺服器，而不是 P2P。
+
 ## 主持人帳號
 
 主持人用 Google 登入（`/login`，OAuth 2.0 authorization code + PKCE，使用 [arctic](https://arcticjs.dev/)），之後可在 `/host/rooms` 看自己的房間和彈幕紀錄。房間歸屬：
