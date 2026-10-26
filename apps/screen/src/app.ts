@@ -16,7 +16,7 @@ import {
   createTray,
 } from './app/core/use-cases/create-main-process-modules';
 import { appConfig, env } from './app/core/use-cases/init-app';
-import { ScreenConnection } from '@danmu/screen-core';
+import { requestClaimUrl, ScreenConnection } from '@danmu/screen-core';
 
 export class App {
   app = app;
@@ -131,6 +131,12 @@ export class App {
     });
 
     ipcMain.handle('app:getConfig', () => this.config);
+
+    ipcMain.handle('app:claimRoom', async () => {
+      if (!this.room) throw new Error('no room yet');
+      const url = await requestClaimUrl(this.config.upstream, this.room);
+      await shell.openExternal(url);
+    });
 
     ipcMain.handle('app:getRoom', () => this.room);
 

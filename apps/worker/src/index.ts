@@ -1,8 +1,13 @@
 import { ROOM_LIFETIME_MS } from '@danmu/shared';
 import type { CreateDanmuRequest, CreatedRoom, Room, RoomList } from '@danmu/shared';
 import { Hono } from 'hono';
+import { csrf } from 'hono/csrf';
+import { auth } from './auth/routes';
+import { host } from './host';
 import type { Context } from 'hono';
 import { createRoom, findRoomByKey, listOnlineRooms } from './db';
+import { currentUser } from './auth/sessions';
+import { createClaimCode } from './claims';
 import { roomStub, sendDanmu } from './danmus';
 import { handleLineEvents } from './line/bot';
 import { verifyLineSignature } from './line/signature';
@@ -41,7 +46,9 @@ api.get('/rooms', async (c) => {
 });
 
 api.post('/rooms', async (c) => {
-  const row = await createRoom(c.env.DB, c.req.header('cf-connecting-ip') ?? null);
+  // A signed-in host's browser screen keeps the room in the host's history.
+  const owner = await currentUser(c);
+  const row = await createRoom(c.env.DB, c.req.header('cf-connecting-ip') ?? null, owner?.id);
   await roomStub(c.env, row.id).open(
     { id: row.id, key: row.key, authToken: row.auth_token },
     ROOM_LIFETIME_MS,
@@ -82,6 +89,21 @@ api.post('/rooms/:key/danmus', async (c) => {
   return c.json(result.danmu, 201);
 });
 
+// A screen asks for a one-time link that adds its room to the host's account (see claims.ts).
+api.post('/rooms/:key/claim-codes', async (c) => {
+  const row = await findRoom(c);
+  if (!row || row.online !== 1) return notFound(c);
+  const body = await c.req
+    .json<{ auth_token?: string }>()
+    .catch((): { auth_token?: string } => ({}));
+  if (body.auth_token !== row.auth_token) return wrongToken(c);
+
+  const { code, expiresAt } = await createClaimCode(c.env.DB, row.id);
+  const url = new URL('/host/claim', c.req.url);
+  url.searchParams.set('code', code);
+  return c.json({ url: url.toString(), expires_at: expiresAt }, 201);
+});
+
 // Polling fallback for screens that do not use the WebSocket yet (original API).
 api.get('/rooms/:key/danmus', async (c) => {
   const row = await findRoom(c);
@@ -117,7 +139,13 @@ api.post('/line/callback', async (c) => {
 });
 
 const app = new Hono<{ Bindings: Env }>();
+// Form POSTs (logout, dev login, room claims) must come from this site.
+app.use('/logout', csrf());
+app.use('/auth/*', csrf());
+app.use('/host/*', csrf());
 app.route('/api', api);
+app.route('/', auth);
+app.route('/', host);
 app.route('/', pages);
 
 export default app;

@@ -5,10 +5,18 @@ declare namespace Cloudflare {
   interface Env {
     LINE_CHANNEL_SECRET: string;
     LINE_CHANNEL_TOKEN: string;
+    GOOGLE_CLIENT_ID: string;
+    GOOGLE_CLIENT_SECRET: string;
+    /** "true" enables the localhost-only development login. Never set in production. */
+    DEV_LOGIN?: string;
   }
 }
 
 interface Env {
   LINE_CHANNEL_SECRET: string;
   LINE_CHANNEL_TOKEN: string;
+  GOOGLE_CLIENT_ID: string;
+  GOOGLE_CLIENT_SECRET: string;
+  /** "true" enables the localhost-only development login. Never set in production. */
+  DEV_LOGIN?: string;
 }

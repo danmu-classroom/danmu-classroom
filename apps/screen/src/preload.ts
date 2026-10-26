@@ -12,6 +12,8 @@ function subscribe<T>(channel: string, callback: (payload: T) => void) {
 
 // The only bridge between the sandboxed renderers and the main process.
 const danmuApi = {
+  /** Opens the browser to add the current room to the host's account. */
+  claimRoom: () => ipcRenderer.invoke('app:claimRoom') as Promise<void>,
   changeCanvasDisplay: (displayId: number) =>
     ipcRenderer.send('dashboard:changeCanvasDisplay', displayId),
   exit: () => ipcRenderer.send('app:exit'),

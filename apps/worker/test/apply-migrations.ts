@@ -7,8 +7,14 @@ await applyD1Migrations(env.DB, env.TEST_MIGRATIONS);
 // AUTOINCREMENT never reuses ids, so rooms (and their Durable Objects) stay distinct.
 beforeEach(async () => {
   await env.DB.batch(
-    ['DELETE FROM danmus', 'DELETE FROM senders', 'DELETE FROM rooms'].map((sql) =>
-      env.DB.prepare(sql),
-    ),
+    [
+      'DELETE FROM room_claims',
+      'DELETE FROM danmus',
+      'DELETE FROM senders',
+      'DELETE FROM rooms',
+      'DELETE FROM sessions',
+      'DELETE FROM oauth_accounts',
+      'DELETE FROM users',
+    ].map((sql) => env.DB.prepare(sql)),
   );
 });

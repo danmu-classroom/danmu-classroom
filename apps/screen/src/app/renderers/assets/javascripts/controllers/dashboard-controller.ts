@@ -6,6 +6,7 @@ import type { AppConfig, Room } from '../../../../core/models';
 export class DashboardController extends Controller {
   static targets = [
     'roomKey',
+    'claimStatus',
     'joinQr',
     'joinUrl',
     'testDanmuInput',
@@ -20,6 +21,7 @@ export class DashboardController extends Controller {
   };
 
   declare appConfigValue: AppConfig;
+  declare claimStatusTarget: HTMLElement;
   declare displaysInputContainerTarget: HTMLElement;
   declare fontFamilySelectTarget: HTMLSelectElement;
   declare fontSizeInputTarget: HTMLInputElement;
@@ -37,6 +39,19 @@ export class DashboardController extends Controller {
     );
     const displayId = Number(input.value);
     window.danmu.changeCanvasDisplay(displayId);
+  }
+
+  claimRoom() {
+    this.claimStatusTarget.innerText = '開啟瀏覽器中…';
+    window.danmu
+      .claimRoom()
+      .then(() => {
+        this.claimStatusTarget.innerText = '請在瀏覽器登入並確認保存';
+      })
+      .catch((error: unknown) => {
+        this.claimStatusTarget.innerText = '無法產生保存連結，請稍後再試';
+        window.danmu.log('error', 'renderer @ claim room failed:', error);
+      });
   }
 
   connect() {

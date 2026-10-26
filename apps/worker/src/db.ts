@@ -16,16 +16,20 @@ const MAX_KEY_ATTEMPTS = 20;
  * Inserts an online room with a key no other online room uses. Uniqueness is enforced by the
  * partial unique index on (key) WHERE online = 1, so concurrent requests cannot collide.
  */
-export async function createRoom(db: D1Database, creatorIp: string | null): Promise<RoomRow> {
+export async function createRoom(
+  db: D1Database,
+  creatorIp: string | null,
+  ownerId: number | null = null,
+): Promise<RoomRow> {
   for (let attempt = 0; attempt < MAX_KEY_ATTEMPTS; attempt++) {
     try {
       const row = await db
         .prepare(
-          `INSERT INTO rooms (key, auth_token, auth_token_sent_at, creator_ip)
-           VALUES (?, ?, strftime('%Y-%m-%dT%H:%M:%fZ', 'now'), ?)
+          `INSERT INTO rooms (key, auth_token, auth_token_sent_at, creator_ip, owner_id)
+           VALUES (?, ?, strftime('%Y-%m-%dT%H:%M:%fZ', 'now'), ?, ?)
            RETURNING id, key, online, auth_token, auth_token_sent_at, created_at`,
         )
-        .bind(generateRoomKey(), generateAuthToken(), creatorIp)
+        .bind(generateRoomKey(), generateAuthToken(), creatorIp, ownerId)
         .first<RoomRow>();
       if (row) return row;
     } catch (error) {

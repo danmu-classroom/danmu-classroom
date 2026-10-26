@@ -54,13 +54,9 @@ pnpm lint
 
 公開 API 送出的彈幕每位發送者有頻率限制（一次最多連送 3 則，之後約每秒 1 則，超過回 429），由房間的 Durable Object 計算；LINE 不受限。
 
-## LINE bot
+## 主持人帳號
 
-對話流程與舊版相同：先按「輸入房號」→ 輸入螢幕上的房號 → 之後傳的每則訊息都會變成彈幕，並可「換個房間」或「離開房間」。對話狀態存在 D1 的 `senders`。
+主持人用 Google 登入（`/login`），之後可在 `/host/rooms` 看自己的房間和每間房的彈幕紀錄。房間怎麼歸到帳號：
 
-需要 Messaging API channel 的兩個值：
-
-```bash
-# 本機：複製範例後填入
-cp apps/worker/.dev.vars.example apps/worker/.dev.
-```
+- 在已登入的瀏覽器開 `/screen`：開的房間自動歸到這個帳號。
+- Electron 螢幕：控制面板按「保存到我的帳號」，會用房間的 `auth_token` 換一個 10 分鐘有效的一�

@@ -1,3 +1,13 @@
-# Copy to .dev.vars for `pnpm dev`. Values come from the LINE Developers console (Messaging API channel).
+# Copy to .dev.vars for `pnpm dev`.
+
+# LINE Developers console → Messaging API channel
 LINE_CHANNEL_SECRET=your-channel-secret
 LINE_CHANNEL_TOKEN=your-channel-access-token
+
+# Google Cloud console → APIs & Services → Credentials → OAuth client ID (Web application)
+# Authorized redirect URI: http://localhost:8787/auth/google/callback
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+
+# Localhost-only login button for development without Google. Never set in production.
+DEV_LOGIN=true
