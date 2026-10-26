@@ -1,17 +1,64 @@
 name: Release screen
 
-# Push a tag like `screen-v1.0.0` (matching apps/screen/package.json) to build the Electron
-# screen on macOS, Windows and Linux and publish a GitHub Release with the installers.
+# Releases the Electron screen automatically: when `version` in apps/screen/package.json changes
+# on main and there is no `screen-v<version>` release yet, this builds the installers on macOS,
+# Windows and Linux and publishes a GitHub Release (which also creates the tag).
 on:
   push:
-    tags: ['screen-v*']
+    branches: [main]
+    paths: ['apps/screen/package.json']
+  workflow_dispatch:
 
 permissions:
   contents: write
 
+concurrency:
+  group: release-screen
+  cancel-in-progress: false
+
 jobs:
+  version:
+    name: Check version
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      tag: ${{ steps.version.outputs.tag }}
+      release: ${{ steps.version.outputs.release }}
+    env:
+      ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v7
+      - id: version
+        name: Is there a release for this version yet?
+        run: |
+          version=$(node -p "require('./apps/screen/package.json').version")
+          tag="screen-v${version}"
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+          echo "tag=${tag}" >> "$GITHUB_OUTPUT"
+          if gh release view "$tag" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
+            echo "release=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::${tag} is already released; nothing to do."
+          else
+            echo "release=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::Releasing ${tag}."
+          fi
+      - uses: actions/setup-node@v7
+        if: steps.version.outputs.release == 'true'
+        with:
+          node-version: 24
+      - name: Test the screen before releasing
+        if: steps.version.outputs.release == 'true'
+        run: |
+          corepack enable pnpm
+          pnpm install --frozen-lockfile --filter "@danmu/screen..."
+          pnpm --filter "@danmu/screen..." typecheck
+          pnpm --filter "@danmu/screen..." test
+
   build:
     name: Build (${{ matrix.platform }})
+    needs: version
+    if: needs.version.outputs.release == 'true'
     strategy:
       fail-fast: false
       matrix:
@@ -35,11 +82,6 @@ jobs:
           node-version: 24
       - run: corepack enable pnpm
       - run: pnpm install --frozen-lockfile --filter "@danmu/screen..."
-      - name: Check the tag matches the app version
-        shell: bash
-        run: |
-          version=$(node -p "require('./apps/screen/package.json').version")
-          [ "${GITHUB_REF_NAME}" = "screen-v${version}" ] || { echo "::error::tag ${GITHUB_REF_NAME} != screen-v${version}"; exit 1; }
       - run: pnpm --filter @danmu/screen exec electron-vite build
       - run: pnpm --filter @danmu/screen exec electron-builder --${{ matrix.platform }} --publish never
       - uses: actions/upload-artifact@v7
@@ -54,7 +96,7 @@ jobs:
 
   release:
     name: Publish GitHub Release
-    needs: build
+    needs: [version, build]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -65,8 +107,9 @@ jobs:
       - name: Create release
         env:
           GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.version.outputs.tag }}
+          version: ${{ needs.version.outputs.version }}
         run: |
-          version=${GITHUB_REF_NAME#screen-v}
           {
             echo "彈幕教室螢幕 v${version}：連到新的 Cloudflare 伺服器，觀眾可用網頁或 LINE 送彈幕。"
             echo
@@ -79,9 +122,11 @@ jobs:
             echo
             echo "安裝檔沒有簽章：macOS 第一次開啟若顯示「無法驗證開發者」，到「系統設定 → 隱私權與安全性」按「強制打開」；Windows 出現 SmartScreen 時按「其他資訊 → 仍要執行」。"
             echo
-            echo "完整變更見 [CHANGELOG](https://github.com/danmu-classroom/danmu-classroom/blob/${GITHUB_REF_NAME}/apps/screen/CHANGELOG.md)。"
+            echo "完整變更見 [CHANGELOG](https://github.com/danmu-classroom/danmu-classroom/blob/${TAG}/apps/screen/CHANGELOG.md)。"
           } > notes.md
-          gh release create "$GITHUB_REF_NAME" artifacts/* \
+          # Creates the tag on the commit that was built
+          gh release create "$TAG" artifacts/* \
+            --target "$GITHUB_SHA" \
             --title "彈幕教室螢幕 v${version}" \
             --notes-file notes.md \
             --latest
