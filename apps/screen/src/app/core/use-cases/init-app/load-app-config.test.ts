@@ -9,10 +9,10 @@ async function loadAppConfig() {
 describe('appConfig', () => {
   afterEach(() => vi.unstubAllEnvs());
 
-  it('uses the deployed Worker by default', async () => {
+  it('uses the public address by default', async () => {
     vi.stubEnv('NODE_ENV', 'production');
 
-    expect((await loadAppConfig()).upstream).toMatch(/^https:\/\/.+\.workers\.dev$/);
+    expect((await loadAppConfig()).upstream).toBe('https://danmu.yang-hong-xin.com');
   });
 
   it('uses `wrangler dev` in development', async () => {
@@ -29,6 +29,6 @@ describe('appConfig', () => {
     expect((await loadAppConfig()).upstream).toBe('http://192.168.1.10:8787');
 
     vi.stubEnv('NODE_ENV', 'production');
-    expect((await loadAppConfig()).upstream).toMatch(/workers\.dev$/);
+    expect((await loadAppConfig()).upstream).toBe('https://danmu.yang-hong-xin.com');
   });
 });
