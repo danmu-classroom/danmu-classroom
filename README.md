@@ -2,7 +2,7 @@
 
 讓台下的人用手機、電腦或 LINE 傳訊息，訊息會變成彈幕飛過講者的螢幕。不用安裝、不用註冊，掃 QR code 就能參與。
 
-**網站：<https://danmu-classroom.danmu-worker.workers.dev>**
+**網站：<https://danmu-classroom.yanghongxin.workers.dev>**
 
 ![彈幕飛過簡報畫面，右下角是加入用的 QR code](docs/images/screen-browser.png)
 
@@ -21,7 +21,7 @@
 |          | 桌面 app                                                                                                                   | 瀏覽器版                                                       |
 | -------- | -------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
 | 適合     | 彈幕疊在簡報（PowerPoint、Keynote…）上方                                                                                   | 不想安裝、直播（OBS）                                          |
-| 取得方式 | 到 [Releases](https://github.com/danmu-classroom/danmu-classroom/releases?q=screen-v&expanded=true) 下載最新的 `screen-v*` | 打開 <https://danmu-classroom.danmu-worker.workers.dev/screen> |
+| 取得方式 | 到 [Releases](https://github.com/danmu-classroom/danmu-classroom/releases?q=screen-v&expanded=true) 下載最新的 `screen-v*` | 打開 <https://danmu-classroom.yanghongxin.workers.dev/screen> |
 
 **桌面 app** 開啟後會出現控制面板，彈幕則顯示在一個透明、可穿透滑鼠的全螢幕視窗上，簡報照常操作。
 
@@ -49,7 +49,7 @@
 
 ### 用網頁（最簡單）
 
-1. 用手機掃螢幕上的 QR code，或打開 <https://danmu-classroom.danmu-worker.workers.dev> 輸入房號
+1. 用手機掃螢幕上的 QR code，或打開 <https://danmu-classroom.yanghongxin.workers.dev> 輸入房號
 2. 輸入想說的話，按「送出彈幕」
 
 <p>
@@ -72,7 +72,7 @@
 
 ## 主持人：課後看紀錄
 
-1. 打開 <https://danmu-classroom.danmu-worker.workers.dev/host/rooms>，用 Google 登入
+1. 打開 <https://danmu-classroom.yanghongxin.workers.dev/host/rooms>，用 Google 登入
 
    ![主持人登入頁](docs/images/host-login.png)
 

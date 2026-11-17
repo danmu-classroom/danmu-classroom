@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-11-17
+
+### Changed
+
+- Connects to https://danmu-classroom.yanghongxin.workers.dev. The server address changed, so 1.0.0 can no longer connect.
+
 ## [1.0.0] - 2026-10-26
 
 ### Changed

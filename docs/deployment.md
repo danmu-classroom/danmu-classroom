@@ -4,7 +4,7 @@
 
 ## 環境
 
-正式環境：<https://danmu-classroom.danmu-worker.workers.dev>（Cloudflare Worker + D1 `danmu-classroom`，APAC）
+正式環境：<https://danmu-classroom.yanghongxin.workers.dev>（Cloudflare Worker + D1 `danmu-classroom`，APAC）
 
 ## CI/CD（GitHub Actions）
 
@@ -38,9 +38,9 @@
 
 ## 外部服務設定
 
-- LINE Developers console → Messaging API → Webhook URL：`https://danmu-classroom.danmu-worker.workers.dev/api/line/callback`（開啟 Use webhook）
+- LINE Developers console → Messaging API → Webhook URL：`https://danmu-classroom.yanghongxin.workers.dev/api/line/callback`（開啟 Use webhook）
 - Google OAuth client → Authorized redirect URIs：
-  - `https://danmu-classroom.danmu-worker.workers.dev/auth/google/callback`
+  - `https://danmu-classroom.yanghongxin.workers.dev/auth/google/callback`
   - `http://localhost:8787/auth/google/callback`（本機）
 
 ## 歷史
