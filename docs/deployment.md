@@ -4,7 +4,7 @@
 
 ## 環境
 
-正式環境：<https://danmu-classroom.yanghongxin.workers.dev>（Cloudflare Worker + D1 `danmu-classroom`，APAC）
+正式環境：<https://danmu.yang-hong-xin.com>（`danmu-classroom.yanghongxin.workers.dev` 也能用，Electron 螢幕與 LINE webhook 用這個；主持人頁面與 Google 登入只在正式網址，其他網址會轉過去）（Cloudflare Worker + D1 `danmu-classroom`，APAC）
 
 ## CI/CD（GitHub Actions）
 
@@ -40,7 +40,7 @@
 
 - LINE Developers console → Messaging API → Webhook URL：`https://danmu-classroom.yanghongxin.workers.dev/api/line/callback`（開啟 Use webhook）
 - Google OAuth client → Authorized redirect URIs：
-  - `https://danmu-classroom.yanghongxin.workers.dev/auth/google/callback`
+  - `https://danmu.yang-hong-xin.com/auth/google/callback`
   - `http://localhost:8787/auth/google/callback`（本機）
 
 ## 歷史

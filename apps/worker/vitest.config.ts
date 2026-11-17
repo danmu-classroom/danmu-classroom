@@ -16,6 +16,8 @@ export default defineConfig(async () => {
             GOOGLE_CLIENT_ID: 'test-google-client',
             GOOGLE_CLIENT_SECRET: 'test-google-secret',
             DEV_LOGIN: 'true',
+            // Tests use their own hosts; the redirect is tested with its own env
+            PUBLIC_URL: '',
           },
         },
       }),

@@ -7,6 +7,8 @@ declare namespace Cloudflare {
     LINE_CHANNEL_TOKEN: string;
     GOOGLE_CLIENT_ID: string;
     GOOGLE_CLIENT_SECRET: string;
+    /** Public address (wrangler.jsonc vars); host pages on any other host redirect there. */
+    PUBLIC_URL?: string;
     /** "true" enables the localhost-only development login. Never set in production. */
     DEV_LOGIN?: string;
   }
@@ -17,6 +19,8 @@ interface Env {
   LINE_CHANNEL_TOKEN: string;
   GOOGLE_CLIENT_ID: string;
   GOOGLE_CLIENT_SECRET: string;
+  /** Public address (wrangler.jsonc vars); host pages on any other host redirect there. */
+  PUBLIC_URL?: string;
   /** "true" enables the localhost-only development login. Never set in production. */
   DEV_LOGIN?: string;
 }

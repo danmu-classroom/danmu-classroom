@@ -4,6 +4,11 @@
   // Not a secret; lets CI deploy with just CLOUDFLARE_API_TOKEN
   "account_id": "c74b247e8c747f6ca397cca820da6319",
   "main": "src/index.ts",
+  // The public address. workers.dev stays on for the Electron screen 1.0.1 and the LINE webhook.
+  "routes": [{ "pattern": "danmu.yang-hong-xin.com", "custom_domain": true }],
+  "workers_dev": true,
+  // Host sign-in pages are only served here, so Google sign-in uses one verified domain
+  "vars": { "PUBLIC_URL": "https://danmu.yang-hong-xin.com" },
   "compatibility_date": "2026-10-01",
   "observability": { "enabled": true },
   // Built by `pnpm build:client` (browser screen script + font); other paths go to the Worker

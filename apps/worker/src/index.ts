@@ -140,6 +140,21 @@ api.post('/line/callback', async (c) => {
 
 const app = new Hono<{ Bindings: Env }>();
 // Form POSTs (logout, dev login, room claims) must come from this site.
+// Host pages and Google sign-in live on the public address only (the brand verified with
+// Google), so links to them from workers.dev are sent there. API, screens, the audience pages
+// and the LINE webhook keep working on every address.
+app.use('*', async (c, next) => {
+  const publicUrl = c.env.PUBLIC_URL;
+  const url = new URL(c.req.url);
+  const isHostPage = /^\/(login|logout|host)(\/|$)|^\/auth\//.test(url.pathname);
+  const isLocal = url.hostname === 'localhost' || url.hostname === '127.0.0.1';
+  if (publicUrl && isHostPage && !isLocal && c.req.method === 'GET') {
+    const target = new URL(publicUrl);
+    if (url.host !== target.host)
+      return c.redirect(`${target.origin}${url.pathname}${url.search}`, 301);
+  }
+  await next();
+});
 app.use('/logout', csrf());
 app.use('/auth/*', csrf());
 app.use('/host/*', csrf());
