@@ -65,6 +65,9 @@ button:disabled { opacity: 0.5; }
 ul { list-style: none; padding: 0; margin: 20px 0 0; }
 li { padding: 8px 0; border-bottom: 1px solid var(--border); word-break: break-word; }
 a { color: var(--accent); }
+h2 { margin: 24px 0 8px; font-size: 19px; }
+ul.plain { list-style: disc; padding-left: 20px; margin: 0; }
+ul.plain li { padding: 4px 0; border-bottom: 0; }
 main.wide { max-width: 880px; }
 header.top { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 16px; }
 header.top form { margin: 0; }

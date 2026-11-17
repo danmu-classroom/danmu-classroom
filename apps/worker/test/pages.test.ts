@@ -29,3 +29,18 @@ describe('browser screen page', () => {
     expect(injected).not.toContain('alert(1)');
   });
 });
+
+describe('privacy policy', () => {
+  it('is public and says what sign-in data is kept', async () => {
+    const response = await get('/privacy');
+    const body = await response.text();
+
+    expect(response.status).toBe(200);
+    expect(body).toContain('<h1>隱私權政策</h1>');
+    expect(body).toContain('電子郵件地址');
+  });
+
+  it('is linked from the home page', async () => {
+    expect(await (await get('/')).text()).toContain('href="/privacy"');
+  });
+});

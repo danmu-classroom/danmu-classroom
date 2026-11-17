@@ -36,7 +36,8 @@ audience.get('/', (c) =>
       <p class="muted">輸入螢幕上的房號，就能把訊息變成彈幕送上螢幕。</p>
       <JoinForm />
       <p class="muted" style="margin-top: 24px">
-        主持人？<a href="/host/rooms">登入看房間紀錄</a> · <a href="/screen">開一個螢幕</a>
+        主持人？<a href="/host/rooms">登入看房間紀錄</a> · <a href="/screen">開一個螢幕</a> ·{' '}
+        <a href="/privacy">隱私權政策</a>
       </p>
     </Layout>,
   ),
