@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.2] - 2026-11-17
+
+### Changed
+
+- Connects to https://danmu.yang-hong-xin.com; the QR code and join link on the screen use it too. 1.0.1 keeps working.
+
 ## [1.0.1] - 2026-11-17
 
 ### Changed

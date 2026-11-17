@@ -5,7 +5,7 @@
   "repository": "https://github.com/danmu-classroom/danmu-classroom",
   "homepage": "https://github.com/danmu-classroom/danmu-classroom",
   "license": "MIT",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "main": "out/main/index.js",
   "scripts": {
     "postinstall": "node node_modules/electron/install.js",
